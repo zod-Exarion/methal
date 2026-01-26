@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(PartialEq, Debug)]
 pub enum Token {
     Number(f32),
     Plus,
@@ -8,9 +8,11 @@ pub enum Token {
     Mod,
     Pow,
 
-    Let,
     Ident(String),
+
+    Let,
     Assign,
+    Arrow,
 }
 
 pub fn get_token(word: &str) -> Token {
@@ -23,6 +25,7 @@ pub fn get_token(word: &str) -> Token {
         "%" => Token::Mod,
         "^" => Token::Pow,
         "=" => Token::Assign,
+        "->" => Token::Arrow,
 
         s => num_or_ident(s),
     }
