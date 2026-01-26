@@ -5,20 +5,74 @@ pub fn tokenize(content: String) -> Vec<Token> {
     let mut token_vec = Vec::new();
 
     for line in content.lines() {
-        for word in line.split_whitespace() {
-            let token = token::get_token(word);
+        let mut chars = line.chars().peekable();
+
+        while let Some(&c) = chars.peek() {
+            let token = match c {
+                '0'..='9' => token::read_number(&mut chars),
+                'a'..='z' | 'A'..='Z' => token::read_string(&mut chars),
+
+                '+' => {
+                    chars.next();
+                    Token::Plus
+                }
+                '-' => {
+                    chars.next();
+                    Token::Minus
+                }
+                '*' => {
+                    chars.next();
+                    Token::Mult
+                }
+                '/' => {
+                    chars.next();
+                    Token::Div
+                }
+                '%' => {
+                    chars.next();
+                    Token::Mod
+                }
+                '^' => {
+                    chars.next();
+                    Token::Pow
+                }
+
+                '(' => {
+                    chars.next();
+                    Token::LParen
+                }
+                ')' => {
+                    chars.next();
+                    Token::RParen
+                }
+
+                '=' => {
+                    chars.next();
+                    Token::Assign
+                }
+
+                '>' => {
+                    chars.next();
+                    Token::Arrow
+                }
+
+                // Skip whitespace
+                ' ' | '\t' | '\n' => {
+                    chars.next();
+                    continue;
+                }
+
+                _ => {
+                    chars.next();
+                    Token::Illegal(c)
+                }
+            };
+
             token_vec.push(token);
         }
     }
 
     token_vec
-}
-
-pub fn display_tokens(tokens: Vec<Token>) {
-    println!("{:?}", tokens);
-    // for token in &tokens {
-    //     println!("{:?}", token);
-    // }
 }
 
 #[cfg(test)]
@@ -27,16 +81,18 @@ mod tests {
 
     #[test]
     fn unit_test() {
-        let input = String::from("let f -> 5x + 7y = 1");
+        let input = String::from("let f > 5x + 7y = 1");
         let tokens = tokenize(input);
 
         let rhs = vec![
             Token::Let,
             Token::Ident("f".to_string()),
             Token::Arrow,
-            Token::Ident("5x".to_string()),
+            Token::Number(5.0),
+            Token::Ident("x".to_string()),
             Token::Plus,
-            Token::Ident("7y".to_string()),
+            Token::Number(7.0),
+            Token::Ident("y".to_string()),
             Token::Assign,
             Token::Number(1.0),
         ];

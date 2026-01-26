@@ -1,6 +1,5 @@
-#[derive(PartialEq, Debug)]
+#[derive(Debug, PartialEq)]
 pub enum Token {
-    Number(f32),
     Plus,
     Minus,
     Mult,
@@ -8,32 +7,48 @@ pub enum Token {
     Mod,
     Pow,
 
+    LParen,
+    RParen,
+
+    Number(f32),
     Ident(String),
 
     Let,
     Assign,
     Arrow,
+
+    Illegal(char),
 }
 
-pub fn get_token(word: &str) -> Token {
-    match word {
-        "let" => Token::Let,
-        "+" => Token::Plus,
-        "-" => Token::Minus,
-        "*" => Token::Mult,
-        "/" => Token::Div,
-        "%" => Token::Mod,
-        "^" => Token::Pow,
-        "=" => Token::Assign,
-        "->" => Token::Arrow,
+pub fn read_number(chars: &mut std::iter::Peekable<std::str::Chars>) -> Token {
+    let mut num = String::new();
 
-        s => num_or_ident(s),
+    while let Some(&c) = chars.peek() {
+        if c.is_ascii_digit() || c == '.' {
+            num.push(c);
+            chars.next();
+        } else {
+            break;
+        }
     }
+
+    Token::Number(num.parse::<f32>().unwrap())
 }
 
-fn num_or_ident(word: &str) -> Token {
-    match word.parse::<f32>() {
-        Ok(num) => Token::Number(num),
-        Err(_) => Token::Ident(word.to_string()),
+pub fn read_string(chars: &mut std::iter::Peekable<std::str::Chars>) -> Token {
+    let mut ident = String::new();
+
+    while let Some(&c) = chars.peek() {
+        if c.is_ascii_alphabetic() {
+            ident.push(c);
+            chars.next();
+        } else {
+            break;
+        }
+    }
+
+    match ident.as_str() {
+        "let" => Token::Let,
+        _ => Token::Ident(ident),
     }
 }
