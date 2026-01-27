@@ -1,4 +1,4 @@
-mod token;
+pub mod token;
 use token::Token;
 
 pub fn tokenize(content: String) -> Vec<Token> {
@@ -17,8 +17,17 @@ pub fn tokenize(content: String) -> Vec<Token> {
                     Token::Plus
                 }
                 '-' => {
+                    let mut token = Token::Minus;
                     chars.next();
-                    Token::Minus
+
+                    if let Some(&c) = chars.peek()
+                        && c == '>'
+                    {
+                        chars.next();
+                        token = Token::Arrow;
+                    }
+
+                    token
                 }
                 '*' => {
                     chars.next();
@@ -51,9 +60,9 @@ pub fn tokenize(content: String) -> Vec<Token> {
                     Token::Assign
                 }
 
-                '>' => {
+                ';' => {
                     chars.next();
-                    Token::Arrow
+                    Token::Semicolon
                 }
 
                 // Skip whitespace
@@ -81,7 +90,7 @@ mod tests {
 
     #[test]
     fn unit_test() {
-        let input = String::from("let f > 5x + 7y = 1");
+        let input = String::from("let f -> 5x + 7y = 1");
         let tokens = tokenize(input);
 
         let rhs = vec![
