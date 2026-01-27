@@ -46,6 +46,11 @@ pub fn tokenize(content: String) -> Vec<Token> {
                     Token::Pow
                 }
 
+                '|' => {
+                    chars.next();
+                    Token::Pipe
+                }
+
                 '(' => {
                     chars.next();
                     Token::LParen

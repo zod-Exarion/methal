@@ -20,11 +20,11 @@ pub enum Expression {
 #[derive(PartialEq, PartialOrd, Debug, Clone, Copy)]
 pub enum Precedence {
     Lowest,
+    Modulus,  // | |
     Sum,      // + -
     Product,  // * /
     Prefix,   // -x
     Exponent, // % ^
-    Parens,   // ( )
 }
 
 pub fn token_precedence(token: &Token) -> Precedence {
@@ -32,6 +32,7 @@ pub fn token_precedence(token: &Token) -> Precedence {
         Token::Plus | Token::Minus => Precedence::Sum,
         Token::Mult | Token::Div => Precedence::Product,
         Token::Mod | Token::Pow => Precedence::Exponent,
+        Token::Pipe => Precedence::Modulus,
         _ => Precedence::Lowest,
     }
 }
@@ -55,6 +56,18 @@ fn parse_prefix(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Result<Ex
             match tokens.next() {
                 Some(Token::RParen) => Ok(expr),
                 other => Err(format!("expected ')', got {:?}", other)),
+            }
+        }
+
+        Some(Token::Pipe) => {
+            let rhs = parse_expression_pratt(tokens, Precedence::Modulus)?;
+
+            match tokens.next() {
+                Some(Token::Pipe) => Ok(Expression::Unary {
+                    op: "modulus".into(),
+                    rhs: Box::new(rhs),
+                }),
+                other => Err(format!("expected '|', got {:?}", other)),
             }
         }
 

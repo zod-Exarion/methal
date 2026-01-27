@@ -6,6 +6,7 @@ pub enum Token {
     Div,
     Mod,
     Pow,
+    Pipe,
 
     LParen,
     RParen,
