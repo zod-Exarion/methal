@@ -5,23 +5,34 @@ use crate::lexer::token::Token;
 use statement::Statement;
 use std::iter::Peekable;
 
-pub fn run_parser(tokens: Vec<Token>) -> Vec<Statement> {
-    let mut tokens = tokens.into_iter().peekable();
-    let mut statement_vec = Vec::new();
+pub struct Parser<I: Iterator<Item = Token>> {
+    tokens: Peekable<I>,
+}
 
-    while let Some(token) = tokens.peek() {
-        let statement = match token {
-            Token::Let => statement::parse_let_statement(&mut tokens),
-            _ => {
-                parsing_error(String::from("Illegal statement"), &mut tokens);
-                Statement::Illegal // the compiler is nagging me so
-            }
-        };
-        statement_vec.push(statement);
-        tokens.next(); // Make sure to parse without consuming last token, consume it here
+impl<I: Iterator<Item = Token>> Parser<I> {
+    pub fn new(tokens: I) -> Self {
+        Self {
+            tokens: tokens.peekable(),
+        }
     }
 
-    statement_vec
+    pub fn run_parser(&mut self) -> Vec<Statement> {
+        let mut statement_vec = Vec::new();
+
+        while let Some(token) = self.tokens.peek() {
+            let statement = match token {
+                Token::Let => statement::parse_let_statement(&mut self.tokens),
+                _ => {
+                    parsing_error(String::from("Illegal statement"), &mut self.tokens);
+                    Statement::Illegal // the compiler is nagging me so
+                }
+            };
+            statement_vec.push(statement);
+            self.tokens.next(); // Make sure to parse without consuming last token, consume it here
+        }
+
+        statement_vec
+    }
 }
 
 //Advances TWICE
@@ -51,6 +62,7 @@ pub fn parsing_error(error: String, tokens: &mut Peekable<impl Iterator<Item = T
 mod tests {
     use super::*;
     use crate::lexer;
+    use crate::parser;
     use expr::{Expression, parse_expression};
 
     fn parse_expr(input: String) -> Expression {
@@ -116,7 +128,8 @@ mod tests {
         let input = String::from("let f -> 6 + 3 * y");
         let tokens = lexer::tokenize(input);
 
-        let ast = run_parser(tokens);
+        let mut parser = parser::Parser::new(tokens.into_iter());
+        let ast = parser.run_parser();
 
         match &ast[0] {
             Statement::Let { name, expr, value } => {
@@ -138,7 +151,8 @@ mod tests {
         let input = String::from("let f -> x = 10");
         let tokens = lexer::tokenize(input);
 
-        let ast = run_parser(tokens);
+        let mut parser = parser::Parser::new(tokens.into_iter());
+        let ast = parser.run_parser();
 
         match &ast[0] {
             Statement::Let { value, .. } => {
