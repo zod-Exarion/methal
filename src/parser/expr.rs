@@ -23,6 +23,7 @@ pub enum Precedence {
     Sum,     // + -
     Product, // * /
     Prefix,  // -x
+    Parens,  // ( )
 }
 
 pub fn token_precedence(token: &Token) -> Precedence {
@@ -44,6 +45,15 @@ fn parse_prefix(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Result<Ex
                 op: "-".into(),
                 rhs: Box::new(rhs),
             })
+        }
+
+        Some(Token::LParen) => {
+            let expr = parse_expression_pratt(tokens, Precedence::Lowest)?;
+
+            match tokens.next() {
+                Some(Token::RParen) => Ok(expr),
+                other => Err(format!("expected ')', got {:?}", other)),
+            }
         }
 
         other => Err(format!("unexpected token in expression: {:?}", other)),

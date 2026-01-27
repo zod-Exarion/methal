@@ -147,4 +147,43 @@ mod tests {
             _ => panic!("expected let statement"),
         }
     }
+
+    #[test]
+    fn parses_nested_parentheses() {
+        let expr = parse_expr("((1 + 2) * (3 + 4))".to_string());
+
+        assert_eq!(
+            expr,
+            Expression::Binary {
+                lhs: Box::new(Expression::Binary {
+                    lhs: Box::new(Expression::Number(1.0)),
+                    op: "+".into(),
+                    rhs: Box::new(Expression::Number(2.0)),
+                }),
+                op: "*".into(),
+                rhs: Box::new(Expression::Binary {
+                    lhs: Box::new(Expression::Number(3.0)),
+                    op: "+".into(),
+                    rhs: Box::new(Expression::Number(4.0)),
+                }),
+            }
+        );
+    }
+
+    #[test]
+    fn unary_with_parentheses() {
+        let expr = parse_expr("-(1 + 2)".to_string());
+
+        assert_eq!(
+            expr,
+            Expression::Unary {
+                op: "-".into(),
+                rhs: Box::new(Expression::Binary {
+                    lhs: Box::new(Expression::Number(1.0)),
+                    op: "+".into(),
+                    rhs: Box::new(Expression::Number(2.0)),
+                }),
+            }
+        );
+    }
 }
