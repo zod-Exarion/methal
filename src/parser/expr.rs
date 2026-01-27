@@ -20,16 +20,18 @@ pub enum Expression {
 #[derive(PartialEq, PartialOrd, Debug, Clone, Copy)]
 pub enum Precedence {
     Lowest,
-    Sum,     // + -
-    Product, // * /
-    Prefix,  // -x
-    Parens,  // ( )
+    Sum,      // + -
+    Product,  // * /
+    Prefix,   // -x
+    Exponent, // % ^
+    Parens,   // ( )
 }
 
 pub fn token_precedence(token: &Token) -> Precedence {
     match token {
         Token::Plus | Token::Minus => Precedence::Sum,
         Token::Mult | Token::Div => Precedence::Product,
+        Token::Mod | Token::Pow => Precedence::Exponent,
         _ => Precedence::Lowest,
     }
 }
@@ -74,6 +76,8 @@ fn parse_infix(
         Token::Minus => "-",
         Token::Mult => "*",
         Token::Div => "/",
+        Token::Mod => "%",
+        Token::Pow => "^",
         _ => unreachable!(),
     };
 
