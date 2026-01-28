@@ -17,25 +17,24 @@ pub enum Operation {
 
 pub fn derive_operation(expr: Expression) -> Operation {
     match expr {
-        Expression::Binary { op, lhs, rhs } => match &op[..] {
+        Expression::Number(n) => Operation::Number(n),
+
+        Expression::Binary { op, lhs, rhs } => match op.as_str() {
             "+" => Operation::Add(lhs, rhs),
             "-" => Operation::Sub(lhs, rhs),
             "*" => Operation::Mult(lhs, rhs),
             "/" => Operation::Div(lhs, rhs),
             "%" => Operation::Rem(lhs, rhs),
             "^" => Operation::Pow(lhs, rhs),
-
-            &_ => unreachable!(),
+            _ => unreachable!("unknown binary operator"),
         },
 
-        Expression::Unary { op, rhs } => match &op[..] {
-            "modulus" => Operation::Abs(rhs),
+        Expression::Unary { op, rhs } => match op.as_str() {
             "-" => Operation::Negative(rhs),
-
-            &_ => unreachable!(),
+            "modulus" => Operation::Abs(rhs),
+            _ => unreachable!("unknown unary operator"),
         },
 
-        Expression::Number(n) => Operation::Number(n),
-        _ => unreachable!(),
+        _ => unreachable!("unknown expression"),
     }
 }
