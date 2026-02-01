@@ -26,6 +26,7 @@ pub fn derive_operation(expr: Expression) -> Operation {
             "/" => Operation::Div(lhs, rhs),
             "%" => Operation::Rem(lhs, rhs),
             "^" => Operation::Pow(lhs, rhs),
+
             _ => unreachable!("unknown binary operator"),
         },
 

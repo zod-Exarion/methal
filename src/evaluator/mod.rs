@@ -3,46 +3,25 @@ use crate::parser::expr::Expression;
 use operation::Operation;
 use operation::derive_operation;
 
+pub fn eval_expr(expr: Expression) -> f32 {
+    evaluate(derive_operation(expr))
+}
+
 pub fn evaluate(operation: Operation) -> f32 {
     match operation {
         Operation::Number(n) => n,
 
-        Operation::Add(lhs, rhs) => {
-            let (left, right) = get_operation(lhs, rhs);
-            evaluate(left) + evaluate(right)
-        }
-        Operation::Sub(lhs, rhs) => {
-            let (left, right) = get_operation(lhs, rhs);
-            evaluate(left) - evaluate(right)
-        }
-        Operation::Mult(lhs, rhs) => {
-            let (left, right) = get_operation(lhs, rhs);
-            evaluate(left) * evaluate(right)
-        }
-        Operation::Div(lhs, rhs) => {
-            let (left, right) = get_operation(lhs, rhs);
-            evaluate(left) / evaluate(right)
-        }
-        Operation::Rem(lhs, rhs) => {
-            let (left, right) = get_operation(lhs, rhs);
-            evaluate(left) % evaluate(right)
-        }
-        Operation::Pow(lhs, rhs) => {
-            let (left, right) = get_operation(lhs, rhs);
-            evaluate(left).powf(evaluate(right))
-        }
+        Operation::Add(lhs, rhs) => eval_expr(*lhs) + eval_expr(*rhs),
+        Operation::Sub(lhs, rhs) => eval_expr(*lhs) - eval_expr(*rhs),
+        Operation::Mult(lhs, rhs) => eval_expr(*lhs) * eval_expr(*rhs),
+        Operation::Div(lhs, rhs) => eval_expr(*lhs) / eval_expr(*rhs),
+        Operation::Rem(lhs, rhs) => eval_expr(*lhs) % eval_expr(*rhs),
+        Operation::Pow(lhs, rhs) => eval_expr(*lhs).powf(eval_expr(*rhs)),
 
-        Operation::Negative(expr) => -evaluate(derive_operation(*expr)),
+        Operation::Negative(expr) => -eval_expr(*expr),
 
-        Operation::Abs(expr) => evaluate(derive_operation(*expr)).abs(),
+        Operation::Abs(expr) => eval_expr(*expr).abs(),
     }
-}
-
-fn get_operation(lhs: Box<Expression>, rhs: Box<Expression>) -> (Operation, Operation) {
-    let lhs = derive_operation(*lhs); // uhh * to destructure Box
-    let rhs = derive_operation(*rhs);
-
-    (lhs, rhs)
 }
 
 #[cfg(test)]
@@ -52,10 +31,6 @@ mod tests {
 
     fn num(n: f32) -> Box<Expression> {
         Box::new(Expression::Number(n))
-    }
-
-    fn eval_expr(expr: Expression) -> f32 {
-        evaluate(derive_operation(expr))
     }
 
     #[test]
@@ -147,5 +122,20 @@ mod tests {
             rhs: num(-7.0),
         };
         assert_eq!(eval_expr(expr), 7.0);
+    }
+
+    #[test]
+    fn test_binary_expression() {
+        let expr: Expression = Expression::Binary {
+            lhs: Box::new(Expression::Number(2.0)),
+            op: "+".into(),
+            rhs: Box::new(Expression::Binary {
+                lhs: Box::new(Expression::Number(3.0)),
+                op: "-".into(),
+                rhs: Box::new(Expression::Number(10.0)),
+            }),
+        };
+
+        assert_eq!(eval_expr(expr), -5.0);
     }
 }
