@@ -167,6 +167,38 @@ mod tests {
     }
 
     #[test]
+    fn parser_assign_statement() {
+        let input = String::from("f+g = 10+h;");
+        let tokens = lexer::tokenize(input);
+
+        let mut parser = parser::Parser::new(tokens.into_iter());
+        let ast = parser.run_parser();
+
+        match &ast[0] {
+            Statement::Assign { expr, value } => {
+                assert_eq!(
+                    *expr,
+                    Expression::Binary {
+                        lhs: Box::new(Expression::Ident("f".into())),
+                        op: "+".into(),
+                        rhs: Box::new(Expression::Ident("g".into()))
+                    }
+                );
+
+                assert_eq!(
+                    *value,
+                    Expression::Binary {
+                        lhs: Box::new(Expression::Number(10.0)),
+                        op: "+".into(),
+                        rhs: Box::new(Expression::Ident("h".into()))
+                    }
+                );
+            }
+            _ => panic!("expected let statement"),
+        }
+    }
+
+    #[test]
     fn parses_nested_parentheses() {
         let expr = parse_expr("((1 + 2) * (3 + 4))".to_string());
 
