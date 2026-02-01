@@ -22,9 +22,13 @@ impl<I: Iterator<Item = Token>> Parser<I> {
         while let Some(token) = self.tokens.peek() {
             let statement = match token {
                 Token::Let => statement::parse_let_statement(&mut self.tokens),
+
+                Token::Ident(_) | Token::Number(_) | Token::Minus | Token::Pipe => {
+                    statement::parse_assign_statement(&mut self.tokens)
+                }
                 _ => {
                     parsing_error(String::from("Illegal statement"), &mut self.tokens);
-                    Statement::Illegal // the compiler is nagging me so
+                    unreachable!("Illegal statement should have been handled")
                 }
             };
             statement_vec.push(statement);

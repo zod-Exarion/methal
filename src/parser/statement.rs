@@ -15,16 +15,9 @@ pub enum Statement {
     },
 
     Assign {
-        name: String,
+        expr: Expression,
         value: Expression,
     },
-
-    Equation {
-        lhs: Expression,
-        rhs: Expression,
-    },
-
-    Illegal,
 }
 
 pub fn parse_let_statement(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Statement {
@@ -61,4 +54,24 @@ pub fn parse_let_statement(tokens: &mut Peekable<impl Iterator<Item = Token>>) -
     }
 
     Statement::Let { name, expr, value }
+}
+
+pub fn parse_assign_statement(tokens: &mut Peekable<impl Iterator<Item = Token>>) -> Statement {
+    // 6x + 3y = 8;
+    let mut expr = Expression::Number(0.0);
+    let mut value = Expression::Number(0.0);
+
+    match parse_expression(tokens) {
+        Ok(e) => expr = e,
+        Err(error) => parsing_error(error, tokens),
+    }
+
+    if expect_kind(TokenKind::Assign, tokens).is_ok() {
+        match parse_expression(tokens) {
+            Ok(e) => value = e,
+            Err(error) => parsing_error(error, tokens),
+        }
+    }
+
+    Statement::Assign { expr, value }
 }

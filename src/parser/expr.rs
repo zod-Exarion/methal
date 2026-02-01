@@ -1,7 +1,7 @@
 use crate::lexer::token::Token;
 use std::iter::Peekable;
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub enum Expression {
     Number(f32),
     Ident(String),
