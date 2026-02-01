@@ -1,4 +1,5 @@
-use crate::lexer::token::Token;
+use crate::lexer::Token;
+use crate::parser::{Operator, get_operator};
 use std::iter::Peekable;
 
 #[derive(PartialEq, Debug, Clone)]
@@ -8,7 +9,7 @@ pub enum Expression {
 
     Binary {
         lhs: Box<Expression>,
-        op: String,
+        op: Operator,
         rhs: Box<Expression>,
     },
     Unary {
@@ -84,19 +85,11 @@ fn parse_infix(
 
     let rhs = parse_expression_pratt(tokens, precedence)?;
 
-    let op = match op_token {
-        Token::Plus => "+",
-        Token::Minus => "-",
-        Token::Mult => "*",
-        Token::Div => "/",
-        Token::Mod => "%",
-        Token::Pow => "^",
-        _ => unreachable!(),
-    };
+    let op = get_operator(&op_token);
 
     Ok(Expression::Binary {
         lhs: Box::new(lhs),
-        op: op.into(),
+        op,
         rhs: Box::new(rhs),
     })
 }

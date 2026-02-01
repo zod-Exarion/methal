@@ -1,5 +1,6 @@
 pub mod token;
-use token::Token;
+
+pub use token::{Token, TokenKind};
 
 pub fn tokenize(content: String) -> Vec<Token> {
     let mut token_vec = Vec::new();

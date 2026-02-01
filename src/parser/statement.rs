@@ -1,9 +1,6 @@
-use crate::lexer::token::Token;
-use crate::lexer::token::TokenKind;
-use crate::parser::expect_kind;
-use crate::parser::expr::Expression;
-use crate::parser::expr::parse_expression;
-use crate::parser::parsing_error;
+use crate::lexer::{Token, TokenKind};
+use crate::parser::{Expression, parse_expression};
+use crate::parser::{expect_kind, parsing_error};
 use std::iter::Peekable;
 
 #[derive(PartialEq, Debug)]

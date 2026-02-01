@@ -3,11 +3,11 @@ pub mod lexer;
 pub mod parser;
 
 use crate::evaluator::eval_expr;
-use crate::parser::statement::Statement;
+use crate::parser::Statement;
 
 pub fn run(content: String) {
     let tokens = lexer::tokenize(content);
-    println!("{:?}", &tokens);
+    // println!("{:?}", &tokens);
     let mut parser = parser::Parser::new(tokens.into_iter());
     let ast = parser.run_parser();
 
@@ -22,5 +22,5 @@ pub fn run(content: String) {
         }
     }
 
-    println!("{:?}", ast);
+    // println!("{:?}", ast);
 }

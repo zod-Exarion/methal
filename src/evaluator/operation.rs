@@ -1,4 +1,4 @@
-use crate::parser::expr::Expression;
+use crate::parser::{Expression, Operator};
 
 #[derive(Debug, PartialEq)]
 pub enum Operation {
@@ -19,15 +19,13 @@ pub fn derive_operation(expr: Expression) -> Operation {
     match expr {
         Expression::Number(n) => Operation::Number(n),
 
-        Expression::Binary { op, lhs, rhs } => match op.as_str() {
-            "+" => Operation::Add(lhs, rhs),
-            "-" => Operation::Sub(lhs, rhs),
-            "*" => Operation::Mult(lhs, rhs),
-            "/" => Operation::Div(lhs, rhs),
-            "%" => Operation::Rem(lhs, rhs),
-            "^" => Operation::Pow(lhs, rhs),
-
-            _ => unreachable!("unknown binary operator"),
+        Expression::Binary { op, lhs, rhs } => match op {
+            Operator::Add => Operation::Add(lhs, rhs),
+            Operator::Sub => Operation::Sub(lhs, rhs),
+            Operator::Mult => Operation::Mult(lhs, rhs),
+            Operator::Div => Operation::Div(lhs, rhs),
+            Operator::Rem => Operation::Rem(lhs, rhs),
+            Operator::Pow => Operation::Pow(lhs, rhs),
         },
 
         Expression::Unary { op, rhs } => match op.as_str() {

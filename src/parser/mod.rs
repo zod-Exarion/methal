@@ -1,8 +1,12 @@
 pub mod expr;
+pub mod operator;
 pub mod statement;
 
+pub use expr::{Expression, parse_expression};
+pub use operator::{Operator, get_operator};
+pub use statement::Statement;
+
 use crate::lexer::token::Token;
-use statement::Statement;
 use std::iter::Peekable;
 
 pub struct Parser<I: Iterator<Item = Token>> {
@@ -90,7 +94,7 @@ mod tests {
             expr,
             Expression::Binary {
                 lhs: Box::new(Expression::Number(1.0)),
-                op: "+".into(),
+                op: Operator::Add,
                 rhs: Box::new(Expression::Number(2.0)),
             }
         );
@@ -104,10 +108,10 @@ mod tests {
             expr,
             Expression::Binary {
                 lhs: Box::new(Expression::Number(1.0)),
-                op: "+".into(),
+                op: Operator::Add,
                 rhs: Box::new(Expression::Binary {
                     lhs: Box::new(Expression::Number(2.0)),
-                    op: "*".into(),
+                    op: Operator::Mult,
                     rhs: Box::new(Expression::Number(3.0)),
                 }),
             }
@@ -142,7 +146,7 @@ mod tests {
 
                 // spot-check structure
                 match expr {
-                    Expression::Binary { op, .. } => assert_eq!(op, "+"),
+                    Expression::Binary { op, .. } => assert_eq!(op, &Operator::Add),
                     _ => panic!("expected binary expression"),
                 }
             }
@@ -180,7 +184,7 @@ mod tests {
                     *expr,
                     Expression::Binary {
                         lhs: Box::new(Expression::Ident("f".into())),
-                        op: "+".into(),
+                        op: Operator::Add,
                         rhs: Box::new(Expression::Ident("g".into()))
                     }
                 );
@@ -189,7 +193,7 @@ mod tests {
                     *value,
                     Expression::Binary {
                         lhs: Box::new(Expression::Number(10.0)),
-                        op: "+".into(),
+                        op: Operator::Add,
                         rhs: Box::new(Expression::Ident("h".into()))
                     }
                 );
@@ -207,13 +211,13 @@ mod tests {
             Expression::Binary {
                 lhs: Box::new(Expression::Binary {
                     lhs: Box::new(Expression::Number(1.0)),
-                    op: "+".into(),
+                    op: Operator::Add,
                     rhs: Box::new(Expression::Number(2.0)),
                 }),
-                op: "*".into(),
+                op: Operator::Mult,
                 rhs: Box::new(Expression::Binary {
                     lhs: Box::new(Expression::Number(3.0)),
-                    op: "+".into(),
+                    op: Operator::Add,
                     rhs: Box::new(Expression::Number(4.0)),
                 }),
             }
@@ -230,7 +234,7 @@ mod tests {
                 op: "-".into(),
                 rhs: Box::new(Expression::Binary {
                     lhs: Box::new(Expression::Number(1.0)),
-                    op: "+".into(),
+                    op: Operator::Add,
                     rhs: Box::new(Expression::Number(2.0)),
                 }),
             }
